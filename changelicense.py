@@ -1,6 +1,7 @@
 from time import sleep
 
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 import argparse
 
 
@@ -13,10 +14,9 @@ def changelicense(driver=None, license=None):
 
 
 def clickNext(driver=None):
-    for e in driver.find_elements_by_tag_name('a'):
-        if e.get_attribute('data-track') == "nextPhotoButtonClick":
-            e.click()
-            break
+    actual_url = driver.current_url
+    while actual_url == driver.current_url:
+        driver.find_element_by_css_selector('body').send_keys(Keys.RIGHT)
 
 
 parser = argparse.ArgumentParser(description="Change multiple photo's license in Flickr")
@@ -40,12 +40,14 @@ driver = webdriver.Firefox(executable_path="./geckodriver")
 driver.get("https://identity.flickr.com/login")
 driver.find_element_by_xpath('//*[@id="login-email"]').send_keys(args.email)
 driver.find_element_by_xpath('/html/body/div/div/div[2]/div/div[2]/form/button/span').click()
+
 sleep(5)
 driver.find_element_by_xpath('//*[@id="login-password"]').send_keys(args.password)
 driver.find_element_by_xpath('/html/body/div/div/div[2]/div/div[2]/form/button').click()
 
 sleep(5)
 driver.find_element_by_link_text('You').click()
+
 sleep(5)
 driver.find_element_by_link_text('Albums').click()
 
@@ -62,8 +64,7 @@ driver.find_elements_by_class_name('photo-list-photo-interaction')[0].click()
 
 i = 0
 while i < num_photos:
-    sleep(5)
+    sleep(1)
     changelicense(driver=driver, license=args.license)
     clickNext(driver=driver)
     i = i + 1
-
